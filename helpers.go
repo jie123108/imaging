@@ -77,7 +77,7 @@ func Open(filename string) (image.Image, error) {
 }
 
 // Encode writes the image img to w in the specified format (JPEG, PNG, GIF, TIFF or BMP).
-func Encode(w io.Writer, img image.Image, format Format) error {
+func Encode(w io.Writer, img image.Image, format Format, quality int) error {
 	var err error
 	switch format {
 	case JPEG:
@@ -91,10 +91,13 @@ func Encode(w io.Writer, img image.Image, format Format) error {
 				}
 			}
 		}
+		if quality == 0 {
+			quality = 80
+		}
 		if rgba != nil {
-			err = jpeg.Encode(w, rgba, &jpeg.Options{Quality: 95})
+			err = jpeg.Encode(w, rgba, &jpeg.Options{Quality: quality})
 		} else {
-			err = jpeg.Encode(w, img, &jpeg.Options{Quality: 95})
+			err = jpeg.Encode(w, img, &jpeg.Options{Quality: quality})
 		}
 
 	case PNG:
@@ -113,7 +116,7 @@ func Encode(w io.Writer, img image.Image, format Format) error {
 
 // Save saves the image to file with the specified filename.
 // The format is determined from the filename extension: "jpg" (or "jpeg"), "png", "gif", "tif" (or "tiff") and "bmp" are supported.
-func Save(img image.Image, filename string) (err error) {
+func Save(img image.Image, filename string, quality int) (err error) {
 	formats := map[string]Format{
 		".jpg":  JPEG,
 		".jpeg": JPEG,
@@ -136,7 +139,7 @@ func Save(img image.Image, filename string) (err error) {
 	}
 	defer file.Close()
 
-	return Encode(file, img, f)
+	return Encode(file, img, f, quality)
 }
 
 // New creates a new image with the specified width and height, and fills it with the specified color.
